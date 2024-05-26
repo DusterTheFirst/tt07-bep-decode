@@ -22,11 +22,11 @@ module tt_um_dusterthefirst_project (
     input  wire       rst_n     // reset_n - low to reset
 );
   // All output pins must be assigned. If not used, assign to 0.
-  // assign uo_out  = {seven_segment_decimal, decimal_digit_place == 0};
-  assign uo_out = {&preamble, &type_1 & &type_2, &constant, &thermostat_id, &room_temp, &set_temp, &state, &tail_1 & &tail_2 & &tail_3};
+  assign uo_out  = {seven_segment_decimal, decimal_digit_place == 1};
+  // assign uo_out = {&preamble, &type_1 & &type_2, &constant, &thermostat_id, &room_temp, &set_temp, &state, &tail_1 & &tail_2 & &tail_3};
   // assign uio_out = {seven_segment_hex, 1'b0};
   assign uio_out[7:0] = 8'b00000000;
-  assign uio_oe  = 8'b10000000;
+  assign uio_oe  = 8'b00000000;
 
   wire pos_edge, neg_edge;
 
@@ -60,31 +60,38 @@ module tt_um_dusterthefirst_project (
     .transmission_begin
   );
 
-  // wire [6:0] seven_segment_decimal;
+  wire [6:0] seven_segment_decimal;
   // wire [6:0] seven_segment_hex;
 
-  // wire [3:0] decimal_digit;
-  // wire [1:0] decimal_digit_place;
+  wire [3:0] decimal_digit;
+  wire [1:0] decimal_digit_place;
 
-  // binary_to_bcd bcd_encode (
-  //   .clock(clk),
-  //   .reset_n(rst_n),
+  binary_to_bcd bcd_encode (
+    .clock(clk),
+    .reset_n(rst_n),
 
-  //   .binary(ui_in),
-  //   .digit(decimal_digit),
+    .binary(room_temp_reg),
+    .digit(decimal_digit),
 
-  //   .digit_place(decimal_digit_place)
-  // );
+    .digit_place(decimal_digit_place)
+  );
 
-  // seven_segment_decode_decimal seven_decimal (
-  //   .digit(decimal_digit),
-  //   .abcdefg(seven_segment_decimal)
-  // );
+  seven_segment_decode_decimal seven_decimal (
+    .digit(decimal_digit),
+    .abcdefg(seven_segment_decimal)
+  );
 
   // seven_segment_decode_hex seven_hex (
   //   .digit(ui_in[3:0]),
   //   .abcdefg(seven_segment_hex)
   // );
+
+  reg [15:0] room_temp_reg;
+  reg [15:0] set_temp_reg;
+  always @(posedge full) begin
+    room_temp_reg <= room_temp;
+    set_temp_reg <= set_temp;
+  end
 
   wire [31:0] preamble;
   wire [15:0] type_1;

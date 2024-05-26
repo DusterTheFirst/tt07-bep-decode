@@ -2,16 +2,16 @@ module binary_to_bcd (
     input wire reset_n,
     input wire clock,
 
-    input wire [7:0] binary,
+    input wire [15:0] binary,
     output wire [3:0] digit,
 
     output reg [1:0] digit_place
 );
-    parameter clock_cycles_pow2 = 3;
+    parameter clock_cycles_pow2 = 14;
 
     reg [clock_cycles_pow2 - 1:0] clock_counter;
 
-    reg [7:0] binary_reg;
+    reg [15:0] binary_reg;
 
     always @(posedge clock) begin
         if (reset_n == 1'b0) begin
@@ -34,7 +34,7 @@ module binary_to_bcd (
         end
     end
 
-    reg [7:0] digit_8;
+    reg [15:0] digit_8;
     assign digit = digit_8[3:0];
 
     always @(*) begin
@@ -42,9 +42,9 @@ module binary_to_bcd (
             0: digit_8 = binary_reg % 10;
             1: digit_8 = (binary_reg / 10) % 10;
             2: digit_8 = (binary_reg / 100) % 10;
-            default: digit_8 = 8'b00001111;
+            default: digit_8 = 16'b1000000000000000;
         endcase
     end
 
-    wire _unused = &{1'b0, digit_8[7:4], 1'b0};
+    wire _unused = &{1'b0, digit_8[15:4], 1'b0};
 endmodule
