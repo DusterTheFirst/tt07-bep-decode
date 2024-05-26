@@ -86,23 +86,23 @@ module tt_um_dusterthefirst_project (
   //   .abcdefg(seven_segment_hex)
   // );
 
-  (* KEEP *) wire [31:0] preamble;
-  (* KEEP *) wire [15:0] type_1;
-  (* KEEP *) wire [15:0] type_2;
-  (* KEEP *) wire [31:0] constant;
+  wire [31:0] preamble;
+  wire [15:0] type_1;
+  wire [15:0] type_2;
+  wire [31:0] constant;
 
-  (* KEEP *) wire [31:0] thermostat_id;
-  (* KEEP *) wire [15:0] room_temp;
-  (* KEEP *) wire [15:0] set_temp;
-  (* KEEP *) wire [7:0] state;
+  wire [31:0] thermostat_id;
+  wire [15:0] room_temp;
+  wire [15:0] set_temp;
+  wire [7:0] state;
 
-  (* KEEP *) wire [7:0] tail_1;
-  (* KEEP *) wire [7:0] tail_2;
-  (* KEEP *) wire [7:0] tail_3;
+  wire [7:0] tail_1;
+  wire [7:0] tail_2;
+  wire [7:0] tail_3;
 
-  (* KEEP *) wire full;
+  wire full;
 
-  serial_decode data_decode (
+  (* KEEP *) serial_decode data_decode (
     .reset(transmission_begin || !rst_n),
     .clock(clk),
 
