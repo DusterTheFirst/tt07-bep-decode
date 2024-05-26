@@ -1,0 +1,48 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/alpine
+{
+	"name": "Alpine",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"privileged": true,
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mshr-h.veriloghdl",
+				"ms-azuretools.vscode-docker",
+				"ms-python.python",
+				"streetsidesoftware.code-spell-checker"
+			]
+		}
+	},
+	"containerEnv": {
+		"DISPLAY": ":0"
+	},
+	"mounts": [
+		"source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached"
+		// "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+	],
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {
+	// 	"ghcr.io/devcontainers/features/docker-in-docker:2": {
+	// 		"moby": true,
+	// 		"azureDnsAutoDetection": true,
+	// 		"installDockerBuildx": true,
+	// 		"installDockerComposeSwitch": true,
+	// 		"version": "latest",
+	// 		"dockerDashComposeVersion": "latest"
+	// 	}
+	// },
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+	// "initializeCommand": {
+	// 	"setup-docker": "stat -c '%g' /var/run/docker.sock > .devcontainer/.dockergroup"
+	// },
+	"onCreateCommand": "set -eu; cd $OPENLANE_ROOT; make;",
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "set -eu; sudo rm -rf ${containerWorkspaceFolder}/tt; sudo cp -r ~/tt ${containerWorkspaceFolder}; sudo chown -R vscode:vscode ${containerWorkspaceFolder}/tt"
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
