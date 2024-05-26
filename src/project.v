@@ -5,7 +5,13 @@
 
 `default_nettype none
 
-module tt_um_example (
+`include "seven_segment_decode.v"
+`include "binary_to_bcd.v"
+`include "serial_decode.v"
+`include "edge_detect.v"
+`include "state_machine.v"
+
+module tt_um_dusterthefirst_project (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path
