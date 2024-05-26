@@ -58,14 +58,14 @@ def validate_data(
     tail: DataDecodeTail,
 ):
     # FIXME: is this all the preamble?
-    assert dut.user_project.preamble.value == expected_preamble["preamble"]
-    assert dut.user_project.type_1.value == expected_preamble["type_12"]
-    assert dut.user_project.type_2.value == expected_preamble["type_12"]
-    assert dut.user_project.constant.value == expected_preamble["constant"]
+    assert dut.user_project.data_decode.preamble.value == expected_preamble["preamble"]
+    assert dut.user_project.data_decode.type_1.value == expected_preamble["type_12"]
+    assert dut.user_project.data_decode.type_2.value == expected_preamble["type_12"]
+    assert dut.user_project.data_decode.constant.value == expected_preamble["constant"]
 
-    assert dut.user_project.thermostat_id.value == expected["thermostat_id"]
-    assert dut.user_project.room_temp.value == expected["room_temp"]
-    set_temp = dut.user_project.set_temp.value
+    assert dut.user_project.data_decode.thermostat_id.value == expected["thermostat_id"]
+    assert dut.user_project.data_decode.room_temp.value == expected["room_temp"]
+    set_temp = dut.user_project.data_decode.set_temp.value
     assert (set_temp == expected["set_temp_low"]) or (
         set_temp == expected["set_temp_low"] + 1
     )
@@ -76,12 +76,12 @@ def validate_data(
     else:
         dut._log.info("high transmission")
 
-    assert dut.user_project.state.value == expected["state"]
+    assert dut.user_project.data_decode.state.value == expected["state"]
 
     current_tail = tail["low" if is_low else "high"]
-    assert dut.user_project.tail_1.value == current_tail[0]
-    assert dut.user_project.tail_2.value == current_tail[1]
-    assert dut.user_project.tail_3.value == current_tail[2]
+    assert dut.user_project.data_decode.tail_1.value == current_tail[0]
+    assert dut.user_project.data_decode.tail_2.value == current_tail[1]
+    assert dut.user_project.data_decode.tail_3.value == current_tail[2]
 
 
 constant_preamble: DataDecodePreamble = {
@@ -97,7 +97,7 @@ async def validate_transmissions(
     tail: DataDecodeTail,
 ):
     while True:
-        await RisingEdge(dut.user_project.full)
+        await RisingEdge(dut.user_project.data_decode.full)
         dut._log.info("Full")
         await ClockCycles(dut.clk, 1)
         validate_data(
@@ -124,7 +124,7 @@ async def transmission_single(dut):
         dut.ui_in[0].value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
-    assert dut.user_project.full.value == 0x1
+    assert dut.user_project.data_decode.full.value == 0x1
 
     validate_data(
         dut,
