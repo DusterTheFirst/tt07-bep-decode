@@ -20,7 +20,7 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: ""
+  ui[0]: "digital_in"
   ui[1]: ""
   ui[2]: ""
   ui[3]: ""
@@ -30,14 +30,14 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "7_segment_A"
+  uo[1]: "7_segment_B"
+  uo[2]: "7_segment_C"
+  uo[3]: "7_segment_D"
+  uo[4]: "7_segment_E"
+  uo[5]: "7_segment_F"
+  uo[6]: "7_segment_G"
+  uo[7]: "7_segment_DP"
 
   # Bidirectional pins
   uio[0]: ""
