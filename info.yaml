@@ -24,8 +24,8 @@ pinout:
   ui[1]: ""
   ui[2]: ""
   ui[3]: ""
-  ui[4]: "address"
-  ui[5]: "address"
+  ui[4]: ""
+  ui[5]: ""
   ui[6]: "address"
   ui[7]: "address"
 

@@ -5,7 +5,7 @@ module serial_decode (
     input wire serial_data,
     input wire serial_clock,
 
-    (* KEEP_HIREARCHY = "TRUE" *) output wire full,
+    output wire full,
 
     output wire [31:0] preamble,
     output wire [15:0] type_1,
