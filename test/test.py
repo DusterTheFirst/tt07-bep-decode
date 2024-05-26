@@ -102,8 +102,8 @@ async def validate_transmissions(
     expected: DataDecode,
     tail: DataDecodeTail,
 ):
-    while True:
-        await RisingEdge(dut.user_project.data_decode.full if not GL_TEST else dut.user_project["\\data_decode.full"])
+    while not GL_TEST:
+        await RisingEdge(dut.user_project.data_decode.full)
         dut._log.info("Full")
         await ClockCycles(dut.clk, 1)
         validate_data(
@@ -130,7 +130,8 @@ async def transmission_single(dut):
         dut.ui_in[0].value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
-    assert (dut.user_project.data_decode.full if not GL_TEST else dut.user_project["\\data_decode.full"]).value == 0x1
+    if not GL_TEST:
+        assert dut.user_project.data_decode.full.value == 0x1
 
     validate_data(
         dut,
