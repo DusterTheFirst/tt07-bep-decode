@@ -5,6 +5,8 @@ module serial_decode (
     input wire serial_data,
     input wire serial_clock,
 
+    output wire full,
+
     output wire [31:0] preamble,
     output wire [15:0] type_1,
     output wire [15:0] type_2,
@@ -21,9 +23,8 @@ module serial_decode (
     // 10101010101010101010101010101010110100111001000111010011100100010000110111111111111111111111111000000010001110010001111110011111000000001100000000000000110010000110010001010000000011000100101
     // PREAMBLE: 32h TYPE?: 16h 16h CONSTANT: 32h THERMOSTAT ID: 32h ROOM: 16d SET: 16d STATE?: 8h CRC?: 8h 8h 8h
 
-    // TODO: FIXME: use DFF RAM??? https://tinytapeout.com/specs/memory/#using-dff-ram
     reg [192:0] shift_register;
-    wire full = shift_register[192];
+    assign full = shift_register[192];
     wire [191:0] transmission = shift_register[191:0];
 
     assign
