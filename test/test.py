@@ -57,6 +57,11 @@ def validate_data(
     expected: DataDecode,
     tail: DataDecodeTail,
 ):
+    if GL_TEST:
+        dut._log.info("GL_TEST unable to validate data")
+
+        return
+
     # FIXME: is this all the preamble?
     assert dut.user_project.data_decode.preamble.value == expected_preamble["preamble"]
     assert dut.user_project.data_decode.type_1.value == expected_preamble["type_12"]
@@ -90,6 +95,7 @@ constant_preamble: DataDecodePreamble = {
     "constant": 0x0DFFFFFE,
 }
 
+GL_TEST = 'GATES' in os.environ and os.environ["GATES"] == "yes"
 
 async def validate_transmissions(
     dut,
@@ -97,7 +103,7 @@ async def validate_transmissions(
     tail: DataDecodeTail,
 ):
     while True:
-        await RisingEdge(dut.user_project.data_decode.full)
+        await RisingEdge(dut.user_project.data_decode.full if not GL_TEST else dut.user_project["\\data_decode.full"])
         dut._log.info("Full")
         await ClockCycles(dut.clk, 1)
         validate_data(
@@ -124,7 +130,7 @@ async def transmission_single(dut):
         dut.ui_in[0].value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
-    assert dut.user_project.data_decode.full.value == 0x1
+    assert (dut.user_project.data_decode.full if not GL_TEST else dut.user_project["\\data_decode.full"]).value == 0x1
 
     validate_data(
         dut,

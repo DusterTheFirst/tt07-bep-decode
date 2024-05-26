@@ -102,7 +102,7 @@ module tt_um_dusterthefirst_project (
 
   wire full;
 
-  (* KEEP *) serial_decode data_decode (
+  serial_decode data_decode (
     .reset(transmission_begin || !rst_n),
     .clock(clk),
 
