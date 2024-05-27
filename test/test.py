@@ -4,18 +4,20 @@
 
 import csv
 import os
+from fractions import Fraction
 from typing import Generator, Tuple, TypedDict
 import cocotb
+from cocotb.types import LogicArray, Range
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, RisingEdge
+from cocotb.triggers import ClockCycles, RisingEdge, Timer
 
 
 async def reset(dut):
     # Reset
     dut._log.info("Reset")
     dut.ena.value = 0b1
-    dut.ui_in.value = 0b0
-    dut.uio_in.value = 0b0
+    dut.digital_in.value = 0b0
+    dut.address.value = 0b0
     dut.rst_n.value = 0b0
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 0b1
@@ -32,13 +34,6 @@ def csv_transmission(files, dut) -> Generator[dict, None, None]:
                 yield row
 
 
-class DataDecodePreamble(TypedDict):
-    # FIXME: is this all the preamble?
-    preamble: int
-    type_12: int
-    constant: int
-
-
 class DataDecode(TypedDict):
     thermostat_id: int
     room_temp: int
@@ -51,64 +46,124 @@ class DataDecodeTail(TypedDict):
     high: Tuple[int, int, int]
 
 
-def validate_data(
+async def validate_data(
     dut,
-    expected_preamble: DataDecodePreamble,
     expected: DataDecode,
     tail: DataDecodeTail,
 ):
-    if GL_TEST:
-        dut._log.info("GL_TEST unable to validate data")
+    # assert dut.parallel_out.value == expected_preamble["preamble"]
+    # assert (
+    #     dut.data_multiplex.data_decode.type_1.value
+    #     == expected_preamble["type_12"]
+    # )
+    # assert (
+    #     dut.data_multiplex.data_decode.type_2.value
+    #     == expected_preamble["type_12"]
+    # )
+    # assert (
+    #     dut.data_multiplex.data_decode.constant.value
+    #     == expected_preamble["constant"]
+    # )
 
-        return
+    readout_speed = Timer(Fraction(1, 500_000), units="sec")
 
-    # FIXME: is this all the preamble?
-    assert dut.user_project.data_multiplex.data_decode.preamble.value == expected_preamble["preamble"]
-    assert dut.user_project.data_multiplex.data_decode.type_1.value == expected_preamble["type_12"]
-    assert dut.user_project.data_multiplex.data_decode.type_2.value == expected_preamble["type_12"]
-    assert dut.user_project.data_multiplex.data_decode.constant.value == expected_preamble["constant"]
 
-    assert dut.user_project.data_multiplex.data_decode.thermostat_id.value == expected["thermostat_id"]
-    assert dut.user_project.data_multiplex.data_decode.room_temp.value == expected["room_temp"]
-    set_temp = dut.user_project.data_multiplex.data_decode.set_temp.value
-    assert (set_temp == expected["set_temp_low"]) or (
-        set_temp == expected["set_temp_low"] + 1
-    )
-    is_low = set_temp == expected["set_temp_low"]
+    thermostat_id = LogicArray(expected["thermostat_id"], Range(31, 0))
+
+    dut.address.value = LogicArray(0, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == thermostat_id[7:0]
+
+    dut.address.value = LogicArray(1, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == thermostat_id[15:8]
+
+    dut.address.value = LogicArray(2, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == thermostat_id[23:16]
+
+    dut.address.value = LogicArray(3, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == thermostat_id[31:24]
+
+
+    room_temp = LogicArray(expected["room_temp"], Range(15, 0))
+
+    dut.address.value = LogicArray(4, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == room_temp[7:0]
+
+    dut.address.value = LogicArray(5, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == room_temp[15:8]
+
+
+    set_temp = LogicArray(expected["set_temp_low"], Range(15, 0))
+    set_temp_plus_one = LogicArray(expected["set_temp_low"] + 1, Range(15, 0))
+
+    dut.address.value = LogicArray(6, Range(3, 0))
+    await readout_speed
+    is_low = dut.parallel_out.value == set_temp[7:0]
+    is_high = dut.parallel_out.value == set_temp_plus_one[7:0]
+    assert is_low or is_high
 
     if is_low:
         dut._log.info("low transmission")
     else:
         dut._log.info("high transmission")
 
-    assert dut.user_project.data_multiplex.data_decode.state.value == expected["state"]
+    dut.address.value = LogicArray(7, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == set_temp[15:8]
+
+
+    dut.address.value = LogicArray(8, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(expected["state"], Range(7, 0))
+
+
 
     current_tail = tail["low" if is_low else "high"]
-    assert dut.user_project.data_multiplex.data_decode.tail_1.value == current_tail[0]
-    assert dut.user_project.data_multiplex.data_decode.tail_2.value == current_tail[1]
-    assert dut.user_project.data_multiplex.data_decode.tail_3.value == current_tail[2]
 
+    dut.address.value = LogicArray(9, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(current_tail[0], Range(7, 0))
 
-constant_preamble: DataDecodePreamble = {
-    "preamble": 0xAAAAAAAA,
-    "type_12": 0xD391,
-    "constant": 0x0DFFFFFE,
-}
+    dut.address.value = LogicArray(10, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(current_tail[1], Range(7, 0))
 
-GL_TEST = 'GATES' in os.environ and os.environ["GATES"] == "yes"
+    dut.address.value = LogicArray(11, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(current_tail[2], Range(7, 0))
+
+    dut.address.value = LogicArray(12, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+
+    dut.address.value = LogicArray(13, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+
+    dut.address.value = LogicArray(14, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+
+    dut.address.value = LogicArray(15, Range(3, 0))
+    await readout_speed
+    assert dut.parallel_out.value == LogicArray(0x0F, Range(7, 0))
 
 async def validate_transmissions(
     dut,
     expected: DataDecode,
     tail: DataDecodeTail,
 ):
-    while not GL_TEST:
-        await RisingEdge(dut.user_project.data_multiplex.data_decode.valid)
+    while True:
+        await RisingEdge(dut.valid)
         dut._log.info("Valid Preamble")
         await ClockCycles(dut.clk, 1)
-        validate_data(
+        await validate_data(
             dut,
-            constant_preamble,
             expected,
             tail,
         )
@@ -127,15 +182,13 @@ async def transmission_single(dut):
 
     for row in csv_transmission(["./data/transmission_digital_hs.csv"], dut):
         await ClockCycles(dut.clk, 1, rising=False)
-        dut.ui_in[0].value = bool(int(row["DIO 0"]))
+        dut.digital_in.value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
-    if not GL_TEST:
-        assert dut.user_project.data_multiplex.data_decode.valid.value == 0x1
+    assert dut.valid.value == 0x1
 
-    validate_data(
+    await validate_data(
         dut,
-        constant_preamble,
         {
             "thermostat_id": 0x03391F89,
             "room_temp": 0x00F6,
@@ -150,7 +203,7 @@ async def transmission_single(dut):
 
     # TODO: is this needed?
     # assert (
-    #     dut.user_project.data_multiplex.data_decode.transmission.value
+    #     dut.data_multiplex.data_decode.transmission.value
     #     == 0xAAAAAAAA_D391_D391_0DFFFFFE_03391F89_00F6_00B5_00_94AE16
     # )
 
@@ -189,7 +242,7 @@ async def transmission_super_long(dut):
         [f"./data/hs_super_long/{x:02}.csv" for x in range(1, 11)], dut
     ):
         await ClockCycles(dut.clk, 1, rising=False)
-        dut.ui_in[0].value = bool(int(row["DIO 0"]))
+        dut.digital_in.value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
     validation.kill()
@@ -229,7 +282,7 @@ async def transmission_repeating(dut):
         [f"./data/hs_repeating/{x:02}.csv" for x in range(1, 11)], dut
     ):
         await ClockCycles(dut.clk, 1, rising=False)
-        dut.ui_in[0].value = bool(int(row["DIO 0"]))
+        dut.digital_in.value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
     validation.kill()
