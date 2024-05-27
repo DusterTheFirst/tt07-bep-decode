@@ -27,20 +27,19 @@ module serial_decode (
   // PREAMBLE: 32h TYPE?: 16h 16h CONSTANT: 32h THERMOSTAT ID: 32h ROOM: 16d SET: 16d STATE?: 8h CRC?: 8h 8h 8h
 
   reg [191:0] shift_register;
-  wire [191:0] transmission = shift_register[191:0];
 
   assign
-      preamble        = transmission[191:160],
-      type_1          = transmission[159:144],
-      type_2          = transmission[143:128],
-      constant        = transmission[127:96 ],
-      thermostat_id   = transmission[ 95:64 ],
-      room_temp       = transmission[ 63:48 ],
-      set_temp        = transmission[ 47:32 ],
-      state           = transmission[ 31:24 ],
-      tail_1          = transmission[ 23:16 ],
-      tail_2          = transmission[ 15:8  ],
-      tail_3          = transmission[  7:0  ];
+      preamble        = shift_register[191:160],
+      type_1          = shift_register[159:144],
+      type_2          = shift_register[143:128],
+      constant        = shift_register[127:96 ],
+      thermostat_id   = shift_register[ 95:64 ],
+      room_temp       = shift_register[ 63:48 ],
+      set_temp        = shift_register[ 47:32 ],
+      state           = shift_register[ 31:24 ],
+      tail_1          = shift_register[ 23:16 ],
+      tail_2          = shift_register[ 15:8  ],
+      tail_3          = shift_register[  7:0  ];
 
   // Shift Register
   always @(posedge clock) begin

@@ -37,13 +37,6 @@ module data_multiplex (
     endcase
   end
 
-  wire [31:0] preamble;
-  wire [15:0] type_1;
-  wire [15:0] type_2;
-  wire [31:0] constant;
-
-  wire _unused = &{1'b0, preamble, type_1, type_2, constant};
-
   wire [31:0] thermostat_id;
   wire [15:0] room_temp;
   wire [15:0] set_temp;
@@ -69,10 +62,6 @@ module data_multiplex (
     .room_temp,
     .set_temp,
 
-    .preamble,
-    .type_1,
-    .type_2,
-    .constant,
     .state,
     .tail_1,
     .tail_2,
