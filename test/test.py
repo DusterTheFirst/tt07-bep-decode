@@ -63,14 +63,14 @@ def validate_data(
         return
 
     # FIXME: is this all the preamble?
-    assert dut.user_project.data_decode.preamble.value == expected_preamble["preamble"]
-    assert dut.user_project.data_decode.type_1.value == expected_preamble["type_12"]
-    assert dut.user_project.data_decode.type_2.value == expected_preamble["type_12"]
-    assert dut.user_project.data_decode.constant.value == expected_preamble["constant"]
+    assert dut.user_project.data_multiplex.preamble.value == expected_preamble["preamble"]
+    assert dut.user_project.data_multiplex.type_1.value == expected_preamble["type_12"]
+    assert dut.user_project.data_multiplex.type_2.value == expected_preamble["type_12"]
+    assert dut.user_project.data_multiplex.constant.value == expected_preamble["constant"]
 
-    assert dut.user_project.data_decode.thermostat_id.value == expected["thermostat_id"]
-    assert dut.user_project.data_decode.room_temp.value == expected["room_temp"]
-    set_temp = dut.user_project.data_decode.set_temp.value
+    assert dut.user_project.data_multiplex.thermostat_id.value == expected["thermostat_id"]
+    assert dut.user_project.data_multiplex.room_temp.value == expected["room_temp"]
+    set_temp = dut.user_project.data_multiplex.set_temp.value
     assert (set_temp == expected["set_temp_low"]) or (
         set_temp == expected["set_temp_low"] + 1
     )
@@ -81,12 +81,12 @@ def validate_data(
     else:
         dut._log.info("high transmission")
 
-    assert dut.user_project.data_decode.state.value == expected["state"]
+    assert dut.user_project.data_multiplex.state.value == expected["state"]
 
     current_tail = tail["low" if is_low else "high"]
-    assert dut.user_project.data_decode.tail_1.value == current_tail[0]
-    assert dut.user_project.data_decode.tail_2.value == current_tail[1]
-    assert dut.user_project.data_decode.tail_3.value == current_tail[2]
+    assert dut.user_project.data_multiplex.tail_1.value == current_tail[0]
+    assert dut.user_project.data_multiplex.tail_2.value == current_tail[1]
+    assert dut.user_project.data_multiplex.tail_3.value == current_tail[2]
 
 
 constant_preamble: DataDecodePreamble = {
@@ -103,7 +103,7 @@ async def validate_transmissions(
     tail: DataDecodeTail,
 ):
     while not GL_TEST:
-        await RisingEdge(dut.user_project.data_decode.full)
+        await RisingEdge(dut.user_project.data_multiplex.full)
         dut._log.info("Full")
         await ClockCycles(dut.clk, 1)
         validate_data(
@@ -131,7 +131,7 @@ async def transmission_single(dut):
         await ClockCycles(dut.clk, 1, rising=True)
 
     if not GL_TEST:
-        assert dut.user_project.data_decode.full.value == 0x1
+        assert dut.user_project.data_multiplex.full.value == 0x1
 
     validate_data(
         dut,
@@ -150,7 +150,7 @@ async def transmission_single(dut):
 
     # TODO: is this needed?
     # assert (
-    #     dut.user_project.data_decode.transmission.value
+    #     dut.user_project.data_multiplex.transmission.value
     #     == 0xAAAAAAAA_D391_D391_0DFFFFFE_03391F89_00F6_00B5_00_94AE16
     # )
 
