@@ -17,6 +17,7 @@ async def reset(dut):
     dut._log.info("Reset")
     dut.ena.value = 0b1
     dut.digital_in.value = 0b0
+    dut.halt.value = 0b0
     dut.address.value = 0b0
     dut.rst_n.value = 0b0
     await ClockCycles(dut.clk, 10)
@@ -67,6 +68,7 @@ async def validate_data(
 
     readout_speed = Timer(Fraction(1, 100_000), units="sec")
 
+    dut.halt.value = True
 
     thermostat_id = LogicArray(expected["thermostat_id"], Range(31, 0))
 
@@ -152,6 +154,8 @@ async def validate_data(
     dut.address.value = LogicArray(15, Range(3, 0))
     await readout_speed
     assert dut.parallel_out.value == LogicArray(0x0F, Range(7, 0)).integer
+
+    dut.halt.value = False
 
 async def validate_transmissions(
     dut,

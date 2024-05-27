@@ -15,6 +15,7 @@ module tb ();
 
   // Named input pins
   reg digital_in;
+  reg halt;
   reg [3:0] address;
 
   // Named output pins
@@ -30,7 +31,7 @@ module tb ();
   reg clk;
   reg rst_n;
   reg ena;
-  wire [7:0] ui_in = {address, 3'b000, digital_in};
+  wire [7:0] ui_in = {address, 1'b0, halt, 1'b0, digital_in};
   wire [7:0] uio_in = 8'b00000000;
   wire [7:0] uo_out;
   wire [7:0] uio_out;

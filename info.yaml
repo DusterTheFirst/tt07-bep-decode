@@ -22,7 +22,7 @@ pinout:
   # Inputs
   ui[0]: "digital_in"
   ui[1]: ""
-  ui[2]: ""
+  ui[2]: "halt"
   ui[3]: ""
   ui[4]: "address[0]"
   ui[5]: "address[1]"

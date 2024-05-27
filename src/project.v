@@ -21,13 +21,14 @@ module tt_um_dusterthefirst_project (
 );
   // All output pins must be assigned. If not used, assign to 0.
   // assign uo_out = 8'b00000000;
-  assign uo_out = parallel_out;
+  assign uo_out = parallel_out & { 8{halt} };
   assign uio_out = {2'b00, pos_edge, neg_edge, transmission_begin, manchester_data, manchester_clock, valid};
   assign uio_oe  = 8'b11111111;
 
   wire _unused = &{1'b0, uio_in, ena, ui_in[3:1]};
 
   wire digital_in = ui_in[0];
+  wire halt = ui_in[2];
   wire [3:0] address = ui_in[7:4];
 
   wire pos_edge, neg_edge;
@@ -47,7 +48,7 @@ module tt_um_dusterthefirst_project (
   // Future (report): Use preamble to determine start of transmission, not a rising edge
   // Future (report): Also maybe use the known preamble to fix alignment problems with preamble (such as first transmission)
   state_machine state_machine (
-    .clock(clk),
+    .clock(clk & !halt),
     .reset(~rst_n),
 
     .pos_edge,
