@@ -1,5 +1,4 @@
 module state_machine (
-    input wire digital_in,
     input wire clock,
     input wire reset,
 
@@ -16,12 +15,12 @@ module state_machine (
     localparam period = 18;
 
     reg [2:0] state, next_state;
-    localparam state_waiting_for_transmission = 3'd0, // TODO: transmission detection (wait for long sequence of low bits)
+    localparam state_waiting_for_transmission = 3'd0, // TODO: preamble detection
                state_armed                    = 3'd1,
                state_timing                   = 3'd2,
                state_looking_for_edge         = 3'd3,
                state_found_edge               = 3'd4,
-               state_end_of_transmission      = ~3'd0; // TODO: when to switch to waiting for transmission
+               state_end_of_transmission      = ~3'd0;
 
     reg decoded, next_decoded;
     reg clock_mask, next_clock_mask;
@@ -106,6 +105,7 @@ module state_machine (
                     next_state = state_waiting_for_transmission;
                 end
             end
+            default: begin end
         endcase
     end
 endmodule

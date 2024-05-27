@@ -21,7 +21,7 @@ module tt_um_dusterthefirst_project (
 );
   // All output pins must be assigned. If not used, assign to 0.
   // assign uo_out = 8'b00000000;
-  assign uio_out = {4'b0000, transmission_begin, manchester_data, manchester_clock, full};
+  assign uio_out = {3'b000, transmission_begin, manchester_data, manchester_clock, valid, full};
   assign uio_oe  = 8'b11111111;
 
   wire _unused = &{1'b0, uio_in, ena, ui_in[3:1]};
@@ -47,7 +47,6 @@ module tt_um_dusterthefirst_project (
   // Future (report): Also maybe use the known preamble to fix alignment problems with preamble (such as first transmission)
   // Maybe double buffer results, verify preamble and other known sections before sending them to the visualizer
   state_machine state_machine (
-    .digital_in(digital_in),
     .clock(clk),
     .reset(~rst_n),
 

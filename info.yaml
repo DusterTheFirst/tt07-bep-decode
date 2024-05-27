@@ -26,8 +26,8 @@ pinout:
   ui[3]: ""
   ui[4]: ""
   ui[5]: ""
-  ui[6]: "address"
-  ui[7]: "address"
+  ui[6]: "address_0"
+  ui[7]: "address_1"
 
   # Outputs
   uo[0]: "parallel_out"
