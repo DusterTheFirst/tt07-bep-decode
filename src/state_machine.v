@@ -11,15 +11,16 @@ module state_machine (
     output reg transmission_begin
 );
 
-    reg [4:0] timer, next_timer;
-    localparam period = 18;
+    reg [3:0] timer, next_timer;
+    localparam period = 18,
+               half_period = 9,
+               quarter_period = 4; // 4.5
 
     reg [2:0] state, next_state;
-    localparam state_waiting_for_transmission = 3'd0, // TODO: preamble detection
-               state_armed                    = 3'd1,
-               state_timing                   = 3'd2,
-               state_looking_for_edge         = 3'd3,
-               state_found_edge               = 3'd4,
+    localparam state_armed                    = 3'd0,
+               state_timing                   = 3'd1,
+               state_looking_for_edge         = 3'd2,
+               state_found_edge               = 3'd3,
                state_end_of_transmission      = ~3'd0;
 
     reg decoded, next_decoded;
@@ -33,7 +34,7 @@ module state_machine (
     always @(posedge clock) begin
         if (reset) begin
             timer <= 0;
-            state <= state_waiting_for_transmission;
+            state <= state_armed;
             decoded <= 0;
             clock_mask <= 0;
             transmission_begin <= 0;
@@ -54,13 +55,6 @@ module state_machine (
         transmission_begin_next = 0;
 
         case (state)
-            state_waiting_for_transmission: begin
-                next_timer = timer + 1;
-                if (timer == ~5'd0) begin
-                    next_timer = 0;
-                    next_state = state_armed;
-                end
-            end
             state_armed: if (pos_edge) begin
                 next_state = state_timing;
                 transmission_begin_next = 1;
@@ -68,7 +62,7 @@ module state_machine (
             state_timing: begin
                 next_timer = timer + 1;
 
-                if (timer > period / 4) begin
+                if (timer > quarter_period) begin
                     next_timer = 0;
                     next_state = state_looking_for_edge;
                 end
@@ -86,23 +80,23 @@ module state_machine (
                     next_clock_mask = 1;
                     next_timer = 0;
                     next_state = state_found_edge;
-                end else if (timer >= period) begin
+                end else if (timer >= half_period) begin
                     next_timer = 0;
                     next_state = state_end_of_transmission;
                 end
             end
             state_found_edge: begin
                 next_timer = timer + 1;
-                if (timer >= period / 4) begin
+                if (timer >= quarter_period) begin
                     next_timer = 0;
                     next_state = state_timing;
                 end
             end
             state_end_of_transmission: begin
                 next_timer = timer + 1;
-                if (timer == ~5'd0) begin
+                if (timer == half_period) begin
                     next_timer = 0;
-                    next_state = state_waiting_for_transmission;
+                    next_state = state_armed;
                 end
             end
             default: begin end

@@ -1,41 +1,32 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Sun May 26 11:43:38 2024
+[*] Mon May 27 13:08:43 2024
 [*]
-[dumpfile] "/workspaces/tt06-bep-decode/test/tb.vcd"
-[dumpfile_mtime] "Sun May 26 11:31:17 2024"
-[dumpfile_size] 18076133
-[savefile] "/workspaces/tt06-bep-decode/test/tb.gtkw"
-[timestart] 2784000000000
-[size] 1280 977
+[dumpfile] "/workspaces/tt07-bep-decode/test/tb.vcd"
+[dumpfile_mtime] "Mon May 27 13:05:30 2024"
+[dumpfile_size] 11587147
+[savefile] "/workspaces/tt07-bep-decode/test/tb.gtkw"
+[timestart] 2335510000000
+[size] 1920 1001
 [pos] -1 -1
-*-36.834530 14110000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-33.834530 14110000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] tb.
 [treeopen] tb.user_project.
+[treeopen] tb.user_project.data_multiplex.
 [sst_width] 297
 [signals_width] 307
 [sst_expanded] 1
-[sst_vpaned_height] 157
+[sst_vpaned_height] 161
 @28
 tb.user_project.state_machine.clock
 tb.user_project.rst_n
-tb.user_project.state_machine.digital_in
-@24
-tb.user_project.state_machine.state[2:0]
-@28
-tb.user_project.state_machine.transmission_begin
-tb.user_project.state_machine.decoded
+tb.user_project.digital_in
+tb.user_project.manchester_data
 @22
-tb.user_project.data_decode.transmission[191:0]
-tb.user_project.data_decode.preamble[31:0]
-tb.user_project.data_decode.type_1[15:0]
-tb.user_project.data_decode.type_2[15:0]
-tb.user_project.data_decode.constant[31:0]
-tb.user_project.data_decode.thermostat_id[31:0]
-tb.user_project.data_decode.room_temp[15:0]
-tb.user_project.data_decode.set_temp[15:0]
-tb.user_project.data_decode.state[7:0]
+tb.user_project.data_multiplex.data_decode.shift_register[192:0]
 @28
-tb.user_project.data_decode.full
+tb.user_project.full
+@29
+tb.user_project.state_machine.transmission_begin
 [pattern_trace] 1
 [pattern_trace] 0
