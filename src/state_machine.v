@@ -10,18 +10,15 @@ module state_machine (
 
     output reg transmission_begin
 );
-
     reg [3:0] timer, next_timer;
-    localparam period = 18,
-               half_period = 9,
-               quarter_period = 4; // 4.5
+    localparam half_period = 9, // 18 / 2 = 9
+               quarter_period = 4; // 18 / 4 = 4.5
 
-    reg [2:0] state, next_state;
-    localparam state_armed                    = 3'd0,
-               state_timing                   = 3'd1,
-               state_looking_for_edge         = 3'd2,
-               state_found_edge               = 3'd3,
-               state_end_of_transmission      = ~3'd0;
+    reg [1:0] state, next_state;
+    localparam state_armed                    = 2'd0,
+               state_timing                   = 2'd1,
+               state_looking_for_edge         = 2'd2,
+               state_found_edge               = 2'd3;
 
     reg decoded, next_decoded;
     reg clock_mask, next_clock_mask;
@@ -82,7 +79,7 @@ module state_machine (
                     next_state = state_found_edge;
                 end else if (timer >= half_period) begin
                     next_timer = 0;
-                    next_state = state_end_of_transmission;
+                    next_state = state_armed;
                 end
             end
             state_found_edge: begin
@@ -92,14 +89,6 @@ module state_machine (
                     next_state = state_timing;
                 end
             end
-            state_end_of_transmission: begin
-                next_timer = timer + 1;
-                if (timer == half_period) begin
-                    next_timer = 0;
-                    next_state = state_armed;
-                end
-            end
-            default: begin end
         endcase
     end
 endmodule
