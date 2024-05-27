@@ -65,37 +65,37 @@ async def validate_data(
     #     == expected_preamble["constant"]
     # )
 
-    readout_speed = Timer(Fraction(1, 500_000), units="sec")
+    readout_speed = Timer(Fraction(1, 100_000), units="sec")
 
 
     thermostat_id = LogicArray(expected["thermostat_id"], Range(31, 0))
 
     dut.address.value = LogicArray(0, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == thermostat_id[7:0]
+    assert dut.parallel_out.value == thermostat_id[7:0].integer
 
     dut.address.value = LogicArray(1, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == thermostat_id[15:8]
+    assert dut.parallel_out.value == thermostat_id[15:8].integer
 
     dut.address.value = LogicArray(2, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == thermostat_id[23:16]
+    assert dut.parallel_out.value == thermostat_id[23:16].integer
 
     dut.address.value = LogicArray(3, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == thermostat_id[31:24]
+    assert dut.parallel_out.value == thermostat_id[31:24].integer
 
 
     room_temp = LogicArray(expected["room_temp"], Range(15, 0))
 
     dut.address.value = LogicArray(4, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == room_temp[7:0]
+    assert dut.parallel_out.value == room_temp[7:0].integer
 
     dut.address.value = LogicArray(5, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == room_temp[15:8]
+    assert dut.parallel_out.value == room_temp[15:8].integer
 
 
     set_temp = LogicArray(expected["set_temp_low"], Range(15, 0))
@@ -103,8 +103,8 @@ async def validate_data(
 
     dut.address.value = LogicArray(6, Range(3, 0))
     await readout_speed
-    is_low = dut.parallel_out.value == set_temp[7:0]
-    is_high = dut.parallel_out.value == set_temp_plus_one[7:0]
+    is_low = dut.parallel_out.value == set_temp[7:0].integer
+    is_high = dut.parallel_out.value == set_temp_plus_one[7:0].integer
     assert is_low or is_high
 
     if is_low:
@@ -114,12 +114,12 @@ async def validate_data(
 
     dut.address.value = LogicArray(7, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == set_temp[15:8]
+    assert dut.parallel_out.value == set_temp[15:8].integer
 
 
     dut.address.value = LogicArray(8, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(expected["state"], Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(expected["state"], Range(7, 0)).integer
 
 
 
@@ -127,31 +127,31 @@ async def validate_data(
 
     dut.address.value = LogicArray(9, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(current_tail[0], Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(current_tail[0], Range(7, 0)).integer
 
     dut.address.value = LogicArray(10, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(current_tail[1], Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(current_tail[1], Range(7, 0)).integer
 
     dut.address.value = LogicArray(11, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(current_tail[2], Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(current_tail[2], Range(7, 0)).integer
 
     dut.address.value = LogicArray(12, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0)).integer
 
     dut.address.value = LogicArray(13, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0)).integer
 
     dut.address.value = LogicArray(14, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0)).integer
 
     dut.address.value = LogicArray(15, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(0x0F, Range(7, 0))
+    assert dut.parallel_out.value == LogicArray(0x0F, Range(7, 0)).integer
 
 async def validate_transmissions(
     dut,
