@@ -1,21 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Mon May 27 20:52:04 2024
+[*] Mon May 27 21:45:01 2024
 [*]
 [dumpfile] "/workspaces/tt07-bep-decode/test/tb.vcd"
-[dumpfile_mtime] "Mon May 27 20:52:04 2024"
-[dumpfile_size] 1249280
+[dumpfile_mtime] "Mon May 27 21:43:23 2024"
+[dumpfile_size] 20429354
 [savefile] "/workspaces/tt07-bep-decode/test/tb.gtkw"
 [timestart] 0
 [size] 1280 977
 [pos] -1 -1
-*-37.134529 410183000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-42.534531 4960000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [sst_width] 297
 [signals_width] 307
 [sst_expanded] 1
-[sst_vpaned_height] 157
+[sst_vpaned_height] 156
 @28
 tb.user_project.rst_n
+tb.clk
 tb.ena
 tb.digital_in
 tb.manchester_clock
@@ -25,5 +26,7 @@ tb.valid
 @22
 tb.address[3:0]
 tb.parallel_out[7:0]
+@28
+tb.halt
 [pattern_trace] 1
 [pattern_trace] 0
