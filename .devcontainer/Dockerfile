@@ -20,7 +20,7 @@ RUN set -eux; \
 USER vscode
 ENV PATH="/home/vscode/.local/bin:${PATH}"
 
-RUN git clone -b tt06 https://github.com/TinyTapeout/tt-support-tools ~/tt
+RUN git clone -b tt07 https://github.com/TinyTapeout/tt-support-tools ~/tt
 
 RUN set -eux; \
     python3 -m venv ~/tt/venv; \
@@ -35,7 +35,7 @@ FROM tt_support as openlane
 ENV OPENLANE_ROOT=/home/vscode/tt/openlane \
     PDK_ROOT=/home/vscode/tt/pdk \
     PDK=sky130A \
-    OPENLANE_TAG=2023.11.23
+    OPENLANE_TAG=2024.04.22
 ENV OPENLANE_IMAGE_NAME=docker.io/efabless/openlane:$OPENLANE_TAG
 
 RUN git clone --depth=1 --branch $OPENLANE_TAG https://github.com/The-OpenROAD-Project/OpenLane.git $OPENLANE_ROOT
