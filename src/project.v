@@ -36,7 +36,7 @@ module tt_um_dusterthefirst_project (
   edge_detect input_edge_detect (
     .digital_in(digital_in),
     .clock(clk),
-    .reset(~rst_n),
+    .reset_n(rst_n),
 
     .pos_edge,
     .neg_edge
@@ -48,8 +48,8 @@ module tt_um_dusterthefirst_project (
   // Future (report): Use preamble to determine start of transmission, not a rising edge
   // Future (report): Also maybe use the known preamble to fix alignment problems with preamble (such as first transmission)
   state_machine state_machine (
-    .clock(clk & !halt),
-    .reset(~rst_n),
+    .clock(clk && !halt),
+    .reset_n(rst_n),
 
     .pos_edge,
     .neg_edge,
@@ -64,7 +64,7 @@ module tt_um_dusterthefirst_project (
   wire [7:0] parallel_out;
 
   data_multiplex data_multiplex (
-    .reset(transmission_begin || !rst_n),
+    .reset_n(!transmission_begin && rst_n),
     .clock(clk),
 
     .serial_clock(manchester_clock),

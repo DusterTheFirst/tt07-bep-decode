@@ -1,7 +1,7 @@
 `include "data_validate.v"
 
 module serial_decode (
-  input wire reset,
+  input wire reset_n,
   input wire clock,
 
   input wire serial_data,
@@ -43,7 +43,7 @@ module serial_decode (
 
   // Shift Register
   always @(posedge clock) begin
-      if (reset) begin
+      if (!reset_n) begin
           shift_register <= 192'b0;
       end else if (!valid && serial_clock == 1'b1) begin
           shift_register[191:1] <= shift_register[190:0];

@@ -1,6 +1,6 @@
 module state_machine (
     input wire clock,
-    input wire reset,
+    input wire reset_n,
 
     input wire pos_edge,
     input wire neg_edge,
@@ -29,7 +29,7 @@ module state_machine (
     reg transmission_begin_next;
 
     always @(posedge clock) begin
-        if (reset) begin
+        if (!reset_n) begin
             timer <= 0;
             state <= state_armed;
             decoded <= 0;

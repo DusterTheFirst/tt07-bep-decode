@@ -1,7 +1,7 @@
 `include "serial_decode.v"
 
 module data_multiplex (
-    input wire reset,
+    input wire reset_n,
     input wire clock,
 
     input wire serial_data,
@@ -49,7 +49,7 @@ module data_multiplex (
   wire [3:0] validations;
 
   serial_decode data_decode (
-    .reset,
+    .reset_n,
     .clock,
 
     .serial_clock,

@@ -1,7 +1,7 @@
 module edge_detect (
     input wire digital_in,
     input wire clock,
-    input wire reset,
+    input wire reset_n,
 
     output reg pos_edge,
     output reg neg_edge
@@ -9,7 +9,7 @@ module edge_detect (
     reg previous_in;
 
     always @(posedge clock) begin
-        if (reset) begin
+        if (!reset_n) begin
             previous_in <= 0;
         end else begin
             previous_in <= digital_in;
@@ -18,6 +18,6 @@ module edge_detect (
 
     always @(*) begin
         pos_edge = (digital_in != previous_in) & digital_in;
-        neg_edge = (digital_in != previous_in) & ~digital_in;
+        neg_edge = (digital_in != previous_in) & !digital_in;
     end
 endmodule
