@@ -52,19 +52,17 @@ module serial_decode (
     tail_3          = shift_register[ 7:0 ];
 
   // Shift Register
-  always @(posedge clock) begin
+  always @(posedge clock or negedge reset_n) begin
     if (!reset_n) begin
       shift_register <= 97'b1;
       preamble_or_data <= state_preamble;
-    end else begin
-      if (serial_clock == 1'b1) begin
-        if (preamble_or_data == state_preamble && valid) begin
-          preamble_or_data <= state_data;
-          shift_register <= {96'b1, serial_data};
-        end else if (!full) begin
-          shift_register[96:1] <= shift_register[95:0];
-          shift_register[0] <= serial_data;
-        end
+    end else if (serial_clock == 1'b1) begin
+      if (preamble_or_data == state_preamble && valid) begin
+        preamble_or_data <= state_data;
+        shift_register <= {96'b1, serial_data};
+      end else if (!full) begin
+        shift_register[96:1] <= shift_register[95:0];
+        shift_register[0] <= serial_data;
       end
     end
   end
