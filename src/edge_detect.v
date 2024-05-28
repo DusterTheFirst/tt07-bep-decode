@@ -17,7 +17,7 @@ module edge_detect (
     end
 
     always @(*) begin
-        pos_edge = (digital_in != previous_in) & digital_in;
-        neg_edge = (digital_in != previous_in) & !digital_in;
+        pos_edge = !previous_in & digital_in;
+        neg_edge = previous_in & !digital_in;
     end
 endmodule
