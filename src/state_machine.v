@@ -1,5 +1,6 @@
 module state_machine (
     input wire clock,
+    input wire enable,
     input wire reset_n,
 
     input wire pos_edge,
@@ -35,7 +36,7 @@ module state_machine (
             decoded <= 0;
             clock_mask <= 0;
             transmission_begin <= 0;
-        end else begin
+        end else if (enable) begin
             timer <= next_timer;
             state <= next_state;
             decoded <= next_decoded;

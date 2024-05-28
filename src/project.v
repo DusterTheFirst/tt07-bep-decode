@@ -48,7 +48,8 @@ module tt_um_dusterthefirst_project (
   // Future (report): Use preamble to determine start of transmission, not a rising edge
   // Future (report): Also maybe use the known preamble to fix alignment problems with preamble (such as first transmission)
   state_machine state_machine (
-    .clock(clk && !halt),
+    .clock(clk),
+    .enable(!halt),
     .reset_n(rst_n),
 
     .pos_edge,
