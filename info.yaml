@@ -40,7 +40,7 @@ pinout:
   uo[7]: "parallel_out[7]"
 
   # Bidirectional pins
-  uio[0]: "valid"
+  uio[0]: "full"
   uio[1]: "manchester_clock"
   uio[2]: "manchester_data"
   uio[3]: "transmission_begin"

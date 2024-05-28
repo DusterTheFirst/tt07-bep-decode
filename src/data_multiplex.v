@@ -10,7 +10,7 @@ module data_multiplex (
     input wire [3:0] address,
 
     output reg [7:0] parallel_out,
-    output wire valid
+    output wire full
 );
 
   // TODO: allow microcontroller to disable RX to allow
@@ -55,7 +55,7 @@ module data_multiplex (
     .serial_clock,
     .serial_data,
 
-    .valid,
+    .full,
     .validations,
 
     .thermostat_id,

@@ -22,7 +22,7 @@ module tt_um_dusterthefirst_project (
   // All output pins must be assigned. If not used, assign to 0.
   // assign uo_out = 8'b00000000;
   assign uo_out = parallel_out & { 8{halt} };
-  assign uio_out = {2'b00, pos_edge, neg_edge, transmission_begin, manchester_data, manchester_clock, valid};
+  assign uio_out = {2'b00, pos_edge, neg_edge, transmission_begin, manchester_data, manchester_clock, full};
   assign uio_oe  = 8'b11111111;
 
   wire _unused = &{1'b0, uio_in, ena, ui_in[3:1]};
@@ -61,7 +61,7 @@ module tt_um_dusterthefirst_project (
     .transmission_begin
   );
 
-  wire valid;
+  wire full;
   wire [7:0] parallel_out;
 
   data_multiplex data_multiplex (
@@ -74,6 +74,6 @@ module tt_um_dusterthefirst_project (
     .address,
     .parallel_out,
 
-    .valid
+    .full
   );
 endmodule

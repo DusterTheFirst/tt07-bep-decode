@@ -20,7 +20,7 @@ module tb ();
 
   // Named output pins
   wire [7:0] parallel_out = uo_out[7:0];
-  wire valid              = uio_out[0],
+  wire full               = uio_out[0],
        manchester_clock   = uio_out[1],
        manchester_data    = uio_out[2],
        transmission_begin = uio_out[3],
