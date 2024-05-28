@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import csv
+from enum import Enum
 import os
 from fractions import Fraction
 from typing import Generator, Tuple, TypedDict
@@ -47,11 +48,16 @@ class DataDecodeTail(TypedDict):
     high: Tuple[int, int, int]
 
 
+class SetTemp(Enum):
+    LOW = 0
+    HIGH = 1
+
+
 async def validate_data(
     dut,
     expected: DataDecode,
     tail: DataDecodeTail,
-):
+) -> SetTemp:
     # assert dut.parallel_out.value == expected_preamble["preamble"]
     # assert (
     #     dut.data_multiplex.data_decode.type_1.value
@@ -88,7 +94,6 @@ async def validate_data(
     await readout_speed
     assert dut.parallel_out.value == thermostat_id[31:24].integer
 
-
     room_temp = LogicArray(expected["room_temp"], Range(15, 0))
 
     dut.address.value = LogicArray(4, Range(3, 0))
@@ -98,7 +103,6 @@ async def validate_data(
     dut.address.value = LogicArray(5, Range(3, 0))
     await readout_speed
     assert dut.parallel_out.value == room_temp[15:8].integer
-
 
     set_temp = LogicArray(expected["set_temp_low"], Range(15, 0))
     set_temp_plus_one = LogicArray(expected["set_temp_low"] + 1, Range(15, 0))
@@ -118,12 +122,9 @@ async def validate_data(
     await readout_speed
     assert dut.parallel_out.value == set_temp[15:8].integer
 
-
     dut.address.value = LogicArray(8, Range(3, 0))
     await readout_speed
     assert dut.parallel_out.value == LogicArray(expected["state"], Range(7, 0)).integer
-
-
 
     current_tail = tail["low" if is_low else "high"]
 
@@ -153,24 +154,42 @@ async def validate_data(
 
     dut.address.value = LogicArray(15, Range(3, 0))
     await readout_speed
-    assert dut.parallel_out.value == LogicArray(0x0F, Range(7, 0)).integer
+    assert dut.parallel_out.value == LogicArray(0x00, Range(7, 0)).integer
 
     dut.halt.value = False
+
+    return SetTemp.LOW if is_low else SetTemp.HIGH
+
+
+class TransmissionStats(TypedDict):
+    high: int
+    low: int
+
 
 async def validate_transmissions(
     dut,
     expected: DataDecode,
     tail: DataDecodeTail,
-):
+    transmission_stats: TransmissionStats,
+) -> int:
+    transmission_stats["high"] = 0
+    transmission_stats["low"] = 0
     while True:
-        await RisingEdge(dut.valid)
+        await RisingEdge(dut.full)
         dut._log.info("Valid Preamble")
         await ClockCycles(dut.clk, 1)
-        await validate_data(
+
+        set_temp = await validate_data(
             dut,
             expected,
             tail,
         )
+
+        match set_temp:
+            case SetTemp.HIGH:
+                transmission_stats["high"] += 1
+            case SetTemp.LOW:
+                transmission_stats["low"] += 1
 
 
 @cocotb.test()
@@ -189,7 +208,7 @@ async def transmission_single(dut):
         dut.digital_in.value = bool(int(row["DIO 0"]))
         await ClockCycles(dut.clk, 1, rising=True)
 
-    assert dut.valid.value == 0x1
+    assert dut.full.value == 0x1
 
     await validate_data(
         dut,
@@ -224,6 +243,8 @@ async def transmission_super_long(dut):
 
     await reset(dut)
 
+    transmission_stats = TransmissionStats(high=0, low=0)
+
     validation = cocotb.start_soon(
         validate_transmissions(
             dut,
@@ -237,6 +258,7 @@ async def transmission_super_long(dut):
                 "low": (0xB0, 0x86, 0x0E),
                 "high": (0x56, 0x84, 0x4E),
             },
+            transmission_stats,
         )
     )
 
@@ -250,6 +272,7 @@ async def transmission_super_long(dut):
         await ClockCycles(dut.clk, 1, rising=True)
 
     validation.kill()
+    assert transmission_stats == TransmissionStats(high=2, low=1)
 
     dut.rst_n.value = 0b0
     await ClockCycles(dut.clk, 10)
@@ -264,6 +287,8 @@ async def transmission_repeating(dut):
 
     await reset(dut)
 
+    transmission_stats = TransmissionStats(high=0, low=0)
+
     validation = cocotb.start_soon(
         validate_transmissions(
             dut,
@@ -277,6 +302,7 @@ async def transmission_repeating(dut):
                 "low": (0xDA, 0xFB, 0x46),
                 "high": (0x3C, 0xF9, 0x06),
             },
+            transmission_stats
         )
     )
 
@@ -290,6 +316,7 @@ async def transmission_repeating(dut):
         await ClockCycles(dut.clk, 1, rising=True)
 
     validation.kill()
+    assert transmission_stats == TransmissionStats(high=8, low=6)
 
     dut.rst_n.value = 0b0
     await ClockCycles(dut.clk, 10)
