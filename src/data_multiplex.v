@@ -2,6 +2,7 @@
 
 module data_multiplex (
     input wire reset_n,
+    input wire clock,
 
     input wire serial_data,
     input wire serial_clock,
@@ -47,6 +48,7 @@ module data_multiplex (
 
   serial_decode serial_decode (
     .reset_n,
+    .clock,
 
     .serial_clock,
     .serial_data,

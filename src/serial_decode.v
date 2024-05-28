@@ -2,6 +2,7 @@
 
 module serial_decode (
   input wire reset_n,
+  input wire clock,
 
   input wire serial_data,
   input wire serial_clock,
@@ -50,11 +51,11 @@ module serial_decode (
     tail_3          = shift_register[ 7:0 ];
 
   // Shift Register
-  always @(posedge serial_clock or negedge reset_n) begin
+  always @(posedge clock or negedge reset_n) begin
     if (!reset_n) begin
       shift_register <= 97'b1;
       preamble_or_data <= state_preamble;
-    end else begin
+    end else if (serial_clock == 1'b1) begin
       if (preamble_or_data == state_preamble && valid) begin
         shift_register <= {96'b1, serial_data};
         preamble_or_data <= state_data;
