@@ -50,7 +50,6 @@ module data_multiplex (
 
   serial_decode data_decode (
     .reset_n,
-    .clock,
 
     .serial_clock,
     .serial_data,
