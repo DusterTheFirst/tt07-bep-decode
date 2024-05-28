@@ -7,7 +7,6 @@ module serial_decode (
   input wire serial_clock,
 
   output wire full,
-  output wire [3:0] validations,
 
   output wire [31:0] thermostat_id,
   output wire [15:0] room_temp,
@@ -57,8 +56,8 @@ module serial_decode (
       preamble_or_data <= state_preamble;
     end else begin
       if (preamble_or_data == state_preamble && valid) begin
-        preamble_or_data <= state_data;
         shift_register <= {96'b1, serial_data};
+        preamble_or_data <= state_data;
       end else if (!full) begin
         shift_register[96:1] <= shift_register[95:0];
         shift_register[0] <= serial_data;
@@ -66,6 +65,7 @@ module serial_decode (
     end
   end
 
+  wire [3:0] validations;
   wire valid = &validations;
 
   data_validate data_validate (

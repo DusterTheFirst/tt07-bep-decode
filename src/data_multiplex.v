@@ -2,7 +2,6 @@
 
 module data_multiplex (
     input wire reset_n,
-    input wire clock,
 
     input wire serial_data,
     input wire serial_clock,
@@ -32,7 +31,7 @@ module data_multiplex (
       // 4'd12
       // 4'd13
       // 4'd14
-      4'd15: parallel_out = {4'b0000, validations};
+      // 4'd15
       default: parallel_out = 8'h000000;
     endcase
   end
@@ -46,16 +45,13 @@ module data_multiplex (
   wire [7:0] tail_2;
   wire [7:0] tail_3;
 
-  wire [3:0] validations;
-
-  serial_decode data_decode (
+  serial_decode serial_decode (
     .reset_n,
 
     .serial_clock,
     .serial_data,
 
     .full,
-    .validations,
 
     .thermostat_id,
     .room_temp,

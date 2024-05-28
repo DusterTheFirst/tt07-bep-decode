@@ -66,7 +66,6 @@ module tt_um_dusterthefirst_project (
 
   data_multiplex data_multiplex (
     .reset_n(!transmission_begin && rst_n),
-    .clock(clk),
 
     .serial_clock(manchester_clock),
     .serial_data(manchester_data),
