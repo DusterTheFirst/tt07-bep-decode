@@ -58,20 +58,6 @@ async def validate_data(
     expected: DataDecode,
     tail: DataDecodeTail,
 ) -> SetTemp:
-    # assert dut.parallel_out.value == expected_preamble["preamble"]
-    # assert (
-    #     dut.data_multiplex.data_decode.type_1.value
-    #     == expected_preamble["type_12"]
-    # )
-    # assert (
-    #     dut.data_multiplex.data_decode.type_2.value
-    #     == expected_preamble["type_12"]
-    # )
-    # assert (
-    #     dut.data_multiplex.data_decode.constant.value
-    #     == expected_preamble["constant"]
-    # )
-
     readout_speed = Timer(Fraction(1, 100_000), units="sec")
 
     dut.halt.value = True
@@ -193,7 +179,8 @@ async def validate_transmissions(
 
 
 @cocotb.test()
-async def transmission_single(dut):
+@cocotb.parameterize(rx=["DIO 0", "DIO 1"]) # FIXME: these may be reversed from the other tests
+async def transmission_single(dut, rx: str):
     dut._log.info("Start")
 
     clock = Clock(dut.clk, 50, units="us")  # 20 kHz
@@ -205,7 +192,7 @@ async def transmission_single(dut):
 
     for row in csv_transmission(["./data/transmission_digital_hs.csv"], dut):
         await ClockCycles(dut.clk, 1, rising=False)
-        dut.digital_in.value = bool(int(row["DIO 0"]))
+        dut.digital_in.value = bool(int(row[rx]))
         await ClockCycles(dut.clk, 1, rising=True)
 
     assert dut.full.value == 0x1
@@ -224,15 +211,6 @@ async def transmission_single(dut):
         },
     )
 
-    # TODO: is this needed?
-    # assert (
-    #     dut.data_multiplex.data_decode.transmission.value
-    #     == 0xAAAAAAAA_D391_D391_0DFFFFFE_03391F89_00F6_00B5_00_94AE16
-    # )
-
-    dut.rst_n.value = 0b0
-    await ClockCycles(dut.clk, 10)
-
 
 @cocotb.test()
 async def transmission_super_long(dut):
@@ -249,7 +227,7 @@ async def transmission_super_long(dut):
         validate_transmissions(
             dut,
             {
-                "thermostat_id": 0x02391F89,
+                "thermostat_id": 0x02391F89,  # FIXME: Weird discrepancy in test data
                 "room_temp": 0x0116,
                 "set_temp_low": 0x0104,
                 "state": 0x00,
@@ -273,9 +251,6 @@ async def transmission_super_long(dut):
 
     validation.kill()
     assert transmission_stats == TransmissionStats(high=2, low=1)
-
-    dut.rst_n.value = 0b0
-    await ClockCycles(dut.clk, 10)
 
 
 @cocotb.test()
@@ -302,7 +277,7 @@ async def transmission_repeating(dut):
                 "low": (0xDA, 0xFB, 0x46),
                 "high": (0x3C, 0xF9, 0x06),
             },
-            transmission_stats
+            transmission_stats,
         )
     )
 
@@ -318,5 +293,98 @@ async def transmission_repeating(dut):
     validation.kill()
     assert transmission_stats == TransmissionStats(high=8, low=6)
 
-    dut.rst_n.value = 0b0
-    await ClockCycles(dut.clk, 10)
+
+@cocotb.test()
+async def transmission_long_turn_off(dut):
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 50, units="us")  # 20 kHz
+    cocotb.start_soon(clock.start())
+
+    await reset(dut)
+
+    transmission_stats = TransmissionStats(high=0, low=0)
+
+    validation = cocotb.start_soon(
+        validate_transmissions(
+            dut,
+            {
+                "thermostat_id": 0x02391F89,  # FIXME: Weird discrepancy in test data
+                "room_temp": 0x0114,
+                "set_temp_low": 0x0000,
+                "state": 0x00,
+            },
+            {
+                "low": (0x48, 0x90, 0xBE),
+                "high": (
+                    0x00,
+                    0x00,
+                    0x00,
+                ),  # No alternating bit since device is turning off
+            },
+            transmission_stats,
+        )
+    )
+
+    dut._log.info("Test")
+
+    for row in csv_transmission(
+        [f"./data/hs_long/{x:01}.csv" for x in range(1, 5)], dut
+    ):
+        await ClockCycles(dut.clk, 1, rising=False)
+        dut.digital_in.value = bool(int(row["DIO 0"]))
+        await ClockCycles(dut.clk, 1, rising=True)
+
+    validation.kill()
+    assert transmission_stats == TransmissionStats(high=0, low=2)
+
+
+@cocotb.test()
+async def transmission_start_mangled(dut):
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 50, units="us")  # 20 kHz
+    cocotb.start_soon(clock.start())
+
+    await reset(dut)
+
+    dut._log.info("Test")
+
+    for row in csv_transmission(["./data/hs/start_mangled.csv"], dut):
+        await ClockCycles(dut.clk, 1, rising=False)
+        dut.digital_in.value = bool(int(row["DIO 0"]))
+        await ClockCycles(dut.clk, 1, rising=True)
+
+    assert dut.full.value == 0x1
+
+    await validate_data(
+        dut,
+        {
+            "thermostat_id": 0x02391F89,  # FIXME: Weird discrepancy in test data
+            "room_temp": 0x0110,
+            "set_temp_low": 0x0104,
+            "state": 0x00,
+        },
+        {
+            "low": (0xAE, 0x87, 0x5A),
+            "high": (0x00, 0x00, 0x00),  # unknown (single transmission capture)
+        },
+    )
+
+@cocotb.test()
+@cocotb.parameterize(file=["noise", "noise_2"], rx=["DIO 0", "DIO 1"])
+async def transmission_noise(dut, file: str, rx: str):
+    dut._log.info("Start")
+
+    clock = Clock(dut.clk, 50, units="us")  # 20 kHz
+    cocotb.start_soon(clock.start())
+
+    await reset(dut)
+
+    dut._log.info("Test")
+
+    for row in csv_transmission([f"./data/hs/{file}.csv"], dut):
+        await ClockCycles(dut.clk, 1, rising=False)
+        dut.digital_in.value = bool(int(row[rx]))
+        await ClockCycles(dut.clk, 1, rising=True)
+        assert dut.full.value == 0x0
