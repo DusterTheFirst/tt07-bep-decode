@@ -33,7 +33,7 @@ module data_multiplex (
       // 4'd13
       // 4'd14
       // 4'd15
-      default: parallel_out = 8'h000000;
+      default: parallel_out = 8'h0000;
     endcase
   end
 
